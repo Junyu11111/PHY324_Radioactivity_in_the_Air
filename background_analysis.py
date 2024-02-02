@@ -50,7 +50,7 @@ if __name__ == "__main__":
     initial_guesses = (100)
     popt, pcov = curve_fit(exponential_decay_fixed, time[start_index:], data_counts[start_index:], p0=initial_guesses)
     plt.plot(time, exponential_decay_fixed(time, *popt), label="model Pb212 half life")
-    plt.plot(time, data_counts - exponential_decay_fixed(time, *popt), label="data-model Pb212 half life")
+    plt.plot(time, data_counts, label="data-model Pb212 half life")
     plt.legend()
     print(popt)
 

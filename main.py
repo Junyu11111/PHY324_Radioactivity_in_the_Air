@@ -5,8 +5,10 @@ from background_analysis import *
 
 
 def decay_model(t, A_B_0, R):
-    term1 = (1 + np.exp(-lambda_B * t) * (epsilon_C / epsilon_B) * lambda_C / (lambda_C - lambda_B))
-    term2 = (epsilon_C / epsilon_B) * (R - (lambda_C / (lambda_C - lambda_B)) * np.exp(-lambda_C * t))
+    term1 = 1 + np.exp(-lambda_B * t) * (epsilon_C / epsilon_B) * lambda_C / (
+                lambda_C - lambda_B)
+    term2 = (epsilon_C / epsilon_B) * (
+                R - (lambda_C / (lambda_C - lambda_B)) * np.exp(-lambda_C * t))
     return A_B_0 * (term1 + term2)
 
 
@@ -25,21 +27,30 @@ if __name__ == "__main__":
 
     time, counts = np.loadtxt('Main_Data_20240201.txt', unpack=True, skiprows=2)
 
-    initial_guesses = [50, 1, 150, 1e-3]
+    initial_guesses = [200, 1, 200, 1e-3]
 
     time = time * sample_size
-    limited_range = [15*3,-1]
+    limited_range = [15 * 3, -1]
     # time = time[limited_range[0]: limited_range[1]]
     # counts = counts[limited_range[0]: limited_range[1]]
-    counts -= 11.23
-    popt, pcov = curve_fit(decay_model_complex, time, counts, p0=initial_guesses)
+    lower_bounds = (40, -10, 40, 1e-6)
+    upper_bounds = (250, 3, 250, 1e-1)
+
+    # uncertainties
+    mu, std = 11, 3
+    counts_uncertainty = np.sqrt(counts) + std
+    counts -= mu
+    popt, pcov = curve_fit(decay_model_complex, time, counts,
+                           sigma=counts_uncertainty, absolute_sigma=True,
+                           p0=initial_guesses, maxfev=50000,
+                           bounds=(lower_bounds, upper_bounds))
     print(popt)
 
     plt.figure(figsize=(10, 6))
-    plt.plot(time, counts, 'b.', label='Data')
+    plt.errorbar(time, counts, yerr=counts_uncertainty, label='Data', fmt='none', ecolor="grey")
     plt.plot(time, decay_model_complex(time, *popt), 'r-', label='Model Fit')
-    background_decay = exponential_decay(time, popt[-2],popt[-1])
-    plt.plot(time,counts-background_decay)
+    background_decay = exponential_decay(time, popt[-2], popt[-1])
+    plt.plot(time, counts - background_decay)
     plt.xlabel('Time (Seconds)')
     plt.ylabel('Count Rate')
     plt.legend()
