@@ -28,19 +28,48 @@ if __name__ == "__main__":
     initial_guesses = [50, 1, 150, 1e-3]
 
     time = time * sample_size
-    limited_range = [15*3,-1]
+    limited_range = [15 * 3, -1]
     # time = time[limited_range[0]: limited_range[1]]
     # counts = counts[limited_range[0]: limited_range[1]]
     counts -= 11.23
     popt, pcov = curve_fit(decay_model_complex, time, counts, p0=initial_guesses)
+    model_predictions = decay_model_complex(time, *popt)
     print(popt)
 
+    # Plot data graph
     plt.figure(figsize=(10, 6))
+    plt.title("Recorded Data of Radioactivity and Fitted Model")
     plt.plot(time, counts, 'b.', label='Data')
-    plt.plot(time, decay_model_complex(time, *popt), 'r-', label='Model Fit')
-    background_decay = exponential_decay(time, popt[-2],popt[-1])
-    plt.plot(time,counts-background_decay)
+    plt.plot(time, model_predictions, 'r-', label='Model Fit')
+    background_decay = exponential_decay(time, popt[-2], popt[-1])
+    plt.plot(time, counts - background_decay)
     plt.xlabel('Time (Seconds)')
     plt.ylabel('Count Rate')
     plt.legend()
+
+    residuals = counts - model_predictions
+
+    # Plot residuals
+    plt.figure("Residual", figsize=(10, 6))
+    plt.title("Residuals Distribution Over Time for Model")
+    plt.plot(time, residuals, 'o', label='Residuals')
+    plt.axhline(0, color='red', linestyle='--')
+    plt.xlabel('Time (Seconds)')
+    plt.ylabel('Residuals')
+    plt.legend()
+    plt.show()
+
+    # Calculate chi-squared
+    chi_squared = np.sum((residuals ** 2) / model_predictions)
+
+    # Calculate reduced chi-squared
+    degrees_of_freedom = len(counts) - len(popt)
+    reduced_chi_squared = chi_squared / degrees_of_freedom
+
+    # Chi-squared probability
+    chi2_prob = 1 - stats.chi2.cdf(chi_squared, degrees_of_freedom)
+
+    print(f"Chi-squared: {chi_squared}")
+    print(f"Reduced Chi-squared: {reduced_chi_squared}")
+    print(f"Chi-squared Probability: {chi2_prob}")
     plt.show()
