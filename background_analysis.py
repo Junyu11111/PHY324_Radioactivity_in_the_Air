@@ -14,7 +14,7 @@ def exponential_decay_fixed(t, N0):
 
 if __name__ == "__main__":
     # background
-    background_counts = np.loadtxt('Bkgrnd_Data_20240201.txt', unpack=True, skiprows=2, usecols=1)
+    background_counts = np.loadtxt('20240202_Bkgrnd_20s_25min.txt', unpack=True, skiprows=2, usecols=1)
 
     plt.hist(background_counts, density=True, bins='auto')
     plt.title('Histogram of Background Counts')
@@ -35,17 +35,18 @@ if __name__ == "__main__":
 
     # model
     plt.figure("data")
-    time, data_counts = np.loadtxt('Main_Data_20240201.txt', unpack=True, skiprows=2)
+    time, data_counts = np.loadtxt('20240202_main_data_20s_4hour.txt', unpack=True, skiprows=2)
     time = time * 20
 
     data_counts -= background_value
 
-    start_index = 200
+    start_index = 500
 
     initial_guesses = (100, 1e-3)
     popt, pcov = curve_fit(exponential_decay, time[start_index:], data_counts[start_index:], p0=initial_guesses)
     plt.plot(time, exponential_decay(time, *popt),label="model best fit starting time index {}".format(start_index*20))
     plt.plot(time, data_counts - exponential_decay(time, *popt), label="data-model best fit")
+    print(popt)
 
     initial_guesses = (100)
     popt, pcov = curve_fit(exponential_decay_fixed, time[start_index:], data_counts[start_index:], p0=initial_guesses)
