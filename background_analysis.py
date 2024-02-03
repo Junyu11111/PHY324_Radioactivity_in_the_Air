@@ -41,7 +41,6 @@ if __name__ == "__main__":
     data_counts -= background_value
 
     start_index = 500
-
     initial_guesses = (100, 1e-3)
     popt, pcov = curve_fit(exponential_decay, time[start_index:], data_counts[start_index:], p0=initial_guesses)
     plt.plot(time, exponential_decay(time, *popt),label="model best fit starting time index {}".format(start_index*20))
