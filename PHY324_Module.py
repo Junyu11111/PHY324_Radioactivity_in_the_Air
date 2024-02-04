@@ -8,7 +8,8 @@ def multiply_with_errors(values_with_uncertainties):
     product = 1.0
     squared_relative_error_sum = 0.0
 
-    for value, uncertainty in values_with_uncertainties:
+    for value_with_uncertainty in values_with_uncertainties:
+        value, uncertainty = value_with_uncertainty
         product *= value
         squared_relative_error_sum += (uncertainty / value) ** 2
 
